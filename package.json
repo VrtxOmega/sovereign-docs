@@ -1,0 +1,15 @@
+{
+  "name": "sovereign-docs",
+  "version": "1.0.0",
+  "description": "SOVEREIGN Docs — Sovereign Document Platform",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron .",
+    "dev": "electron . --dev"
+  },
+  "author": "RJ Lopez",
+  "license": "MIT",
+  "dependencies": {
+    "electron": "^28.0.0"
+  }
+}

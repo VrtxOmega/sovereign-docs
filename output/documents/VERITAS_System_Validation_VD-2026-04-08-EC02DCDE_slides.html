@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERITAS System Validation — VERITAS Slides</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden;background:#080808;color:#F5EDD6}
+.slide{position:fixed;top:0;left:0;width:100%;height:100%;display:flex;flex-direction:column;justify-content:center;align-items:center;padding:60px 80px;opacity:0;pointer-events:none;transition:opacity 0.4s ease}
+.slide.active{opacity:1;pointer-events:all}
+.slide-content{max-width:900px;width:100%;text-align:left}
+.slide-omega{font-family:'Orbitron',monospace;font-size:96px;font-weight:900;color:#C9A84C;text-shadow:0 0 12px rgba(240,192,64,0.7),0 0 50px rgba(201,168,76,.4);line-height:1;margin-bottom:16px;text-align:center}
+.slide-brand{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:20px;letter-spacing:10px;color:#C9A84C;text-transform:uppercase;text-align:center;margin-bottom:8px}
+.slide-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:36px;color:#C9A84C;text-align:center;margin-top:24px}
+.slide-date{font-family:'Share Tech Mono',monospace;font-size:13px;color:#999;text-align:center;margin-top:12px}
+.slide-heading{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:28px;color:#C9A84C;letter-spacing:2px;margin-bottom:24px;border-bottom:2px solid #C9A84C;padding-bottom:10px}
+h3{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:18px;color:#CCC;margin:20px 0 10px}
+p{font-family:'Share Tech Mono',monospace;font-size:16px;line-height:1.8;margin:10px 0;color:#F5EDD6}
+.slide-bullet{font-family:'Share Tech Mono',monospace;font-size:16px;line-height:2;color:#F5EDD6;padding-left:8px}
+.slide-bullet strong{color:#C9A84C}
+.slide-quote{border-left:3px solid #C9A84C;padding:10px 20px;margin:14px 0;font-style:italic;color:#8B6B20;font-size:15px}
+code{font-family:'Share Tech Mono',monospace;background:#111;padding:2px 6px;border:1px solid #222;color:#8B6B20}
+pre{background:#0a0a0a;border:1px solid #2a1f08;padding:16px;margin:12px 0;border-radius:0;overflow-x:auto}
+pre code{background:none;border:none;padding:0;color:#888;font-size:13px}
+strong{color:#C9A84C}
+em{color:#999}
+a{color:#C9A84C;text-decoration:none}
+.slide-footer{position:absolute;bottom:20px;left:0;right:0;display:flex;justify-content:space-between;padding:0 40px}
+.slide-counter{font-family:'Rajdhani',sans-serif;font-size:12px;letter-spacing:3px;color:#8B6B20}
+.slide-logo{font-family:'Orbitron',monospace;font-size:10px;letter-spacing:2px;color:#8B6B20}
+@media print{
+  .slide{position:relative !important;opacity:1 !important;pointer-events:all !important;page-break-after:always;height:auto;min-height:100vh}
+  .slide-footer{position:relative;margin-top:40px}
+}
+</style>
+</head>
+<body>
+<div class="slide" data-index="0">
+    <div class="slide-content">
+    <div class="slide-omega">Ω</div>
+    <div class="slide-brand">VERITAS DOCS</div>
+    <div class="slide-title">VERITAS System Validation</div>
+    <div class="slide-date">April 08, 2026</div>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-counter">1 / 5</span>
+      <span class="slide-logo">Ω VERITAS DOCS</span>
+    </div>
+  </div>
+<div class="slide" data-index="1">
+    <div class="slide-content">
+    <h2 class="slide-heading">Executive Summary</h2>
+    <p>This document validates that all six output engines produce correct, branded output from a single markdown source.</p>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-counter">2 / 5</span>
+      <span class="slide-logo">Ω VERITAS DOCS</span>
+    </div>
+  </div>
+<div class="slide" data-index="2">
+    <div class="slide-content">
+    <h2 class="slide-heading">Architecture</h2>
+    <p>VERITAS Docs is a sovereign document platform with multi-format export.</p>
+    <p>| Component | Status | Engine |</p>
+    <p>| --------- | ------ | ------ |</p>
+    <p>| PDF | Active | ReportLab |</p>
+    <p>| DOCX | Active | python-docx |</p>
+    <p>| HTML | Active | Jinja2 |</p>
+    <p>| MD | Active | Native |</p>
+    <p>| TXT | Active | Native |</p>
+    <p>| Slides | Active | Custom |</p>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-counter">3 / 5</span>
+      <span class="slide-logo">Ω VERITAS DOCS</span>
+    </div>
+  </div>
+<div class="slide" data-index="3">
+    <div class="slide-content">
+    <h2 class="slide-heading">Key Features</h2>
+    <div class="slide-bullet">▸ <strong>Multi-format export</strong> - one click, six formats</div>
+    <div class="slide-bullet">▸ <strong>Branded output</strong> - gold-and-obsidian VERITAS design</div>
+    <div class="slide-bullet">▸ <strong>Provenance receipt</strong> - every export is traced</div>
+    <div class="slide-bullet">▸ <strong>Confidentiality stamps</strong> - classification watermarks</div>
+    <div class="slide-quote">VERITAS does not determine what is true. It determines what survives.</div>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-counter">4 / 5</span>
+      <span class="slide-logo">Ω VERITAS DOCS</span>
+    </div>
+  </div>
+<div class="slide" data-index="4">
+    <div class="slide-content">
+    <h2 class="slide-heading">Conclusion</h2>
+    <p>All engines operational. System ready for deployment.</p>
+    </div>
+    <div class="slide-footer">
+      <span class="slide-counter">5 / 5</span>
+      <span class="slide-logo">Ω VERITAS DOCS</span>
+    </div>
+  </div>
+<script>
+let current = 0;
+const slides = document.querySelectorAll('.slide');
+function showSlide(n) {
+  slides.forEach(s => s.classList.remove('active'));
+  current = Math.max(0, Math.min(n, slides.length - 1));
+  slides[current].classList.add('active');
+}
+showSlide(0);
+document.addEventListener('keydown', e => {
+  if (e.key === 'ArrowRight' || e.key === ' ') showSlide(current + 1);
+  if (e.key === 'ArrowLeft') showSlide(current - 1);
+  if (e.key === 'Home') showSlide(0);
+  if (e.key === 'End') showSlide(slides.length - 1);
+});
+// Touch/swipe support
+let touchX = 0;
+document.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; });
+document.addEventListener('touchend', e => {
+  const dx = e.changedTouches[0].clientX - touchX;
+  if (Math.abs(dx) > 50) showSlide(current + (dx < 0 ? 1 : -1));
+});
+</script>
+</body>
+</html>

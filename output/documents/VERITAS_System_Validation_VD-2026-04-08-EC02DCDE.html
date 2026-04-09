@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>VERITAS System Validation — VERITAS Docs</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --gold:#C9A84C;--gold-bright:#F0C040;--gold-dim:#8B6B20;
+  --bg:#080808;--white:#F5EDD6;--gray:#4a4030;
+  --conf-color:#4A90D9;
+}
+body{background:var(--bg);color:var(--white);font-family:'Share Tech Mono',monospace;font-size:13px;line-height:1.8;min-height:100vh;padding:0}
+.hero{text-align:center;padding:60px 40px 40px;border-bottom:1px solid #2a1f08;position:relative;overflow:hidden}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:700px;height:350px;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.1) 0%,transparent 65%);pointer-events:none}
+.omega{font-family:'Orbitron',monospace;font-size:72px;font-weight:900;color:var(--gold);text-shadow:0 0 12px rgba(240,192,64,0.7),0 0 50px rgba(201,168,76,.4);line-height:1;margin-bottom:12px;position:relative;z-index:1}
+.brand{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:20px;letter-spacing:8px;color:var(--gold);text-transform:uppercase;position:relative;z-index:1}
+.doc-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:28px;color:var(--gold);margin-top:20px;position:relative;z-index:1}
+.doc-sub{color:#AAAAAA;font-size:13px;margin-top:6px;position:relative;z-index:1}
+.doc-date{color:#999;font-size:11px;margin-top:8px;position:relative;z-index:1}
+.conf-badge{display:inline-block;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:3px;color:var(--conf-color);border:1px solid var(--conf-color);padding:3px 12px;margin-top:12px;position:relative;z-index:1}
+.content{max-width:860px;margin:0 auto;padding:40px 24px}
+h1{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:22px;color:var(--gold);margin:32px 0 12px;letter-spacing:2px;border-bottom:1px solid var(--gold);padding-bottom:8px}
+h2{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:16px;color:var(--gold);margin:28px 0 10px;letter-spacing:2px;border-bottom:1px solid #2a1f08;padding-bottom:6px}
+h3{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:13px;color:#CCC;margin:20px 0 8px;letter-spacing:1px}
+h4{font-family:'Rajdhani',sans-serif;font-weight:600;font-size:12px;color:#999;margin:16px 0 6px}
+p{margin:8px 0;line-height:1.8}
+strong{color:var(--white)}
+em{color:#999;font-style:italic}
+a{color:var(--gold);text-decoration:none;border-bottom:1px solid var(--gold-dim)}
+a:hover{color:var(--gold-bright)}
+code{font-family:'Share Tech Mono',monospace;background:#111;padding:2px 6px;border:1px solid #222;font-size:12px;color:var(--gold-dim)}
+pre{background:#0d0d0d;border:1px solid #2a1f08;padding:16px;margin:12px 0;overflow-x:auto}
+pre code{background:none;border:none;padding:0;color:#888;font-size:11px}
+blockquote{border-left:3px solid var(--gold);padding:10px 16px;margin:12px 0;color:var(--gold-dim);background:rgba(201,168,76,.04);font-style:italic}
+ul{margin:8px 0;padding-left:24px}
+li{margin:4px 0;color:var(--white)}
+li::marker{color:var(--gold)}
+table{width:100%;border-collapse:collapse;margin:14px 0;font-size:12px}
+th{background:var(--gold);color:#0d0d0d;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-align:left;padding:8px 10px;text-transform:uppercase}
+td{padding:7px 10px;border-bottom:1px solid #1a1a1a;color:var(--white)}
+tr:nth-child(even) td{background:#0a0a0a}
+tr:nth-child(odd) td{background:#0d0d0d}
+hr.section-break{border:none;border-top:1px solid #2a1f08;margin:28px 0}
+.motto{text-align:center;padding:28px;border-top:1px solid var(--gold);margin-top:40px;font-style:italic;color:var(--gold-dim);font-size:12px}
+.footer{text-align:center;padding:16px;font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:4px;color:var(--gold-dim);text-transform:uppercase}
+.footer span{color:var(--gold)}
+@media print{
+  body{background:#fff;color:#222}
+  .hero{background:#fff;border-color:#ccc}
+  .omega,.brand,.doc-title{color:#222}
+  h1,h2{color:#222;border-color:#ccc}
+  pre{background:#f5f5f5;border-color:#ddd}
+  th{background:#eee;color:#222}
+  td{border-color:#ddd;color:#222}
+}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="omega">Ω</div>
+  <div class="brand">VERITAS DOCS</div>
+  <div class="doc-title">VERITAS System Validation</div>
+  
+  <div class="doc-date">Generated: April 08, 2026 — 15:53</div>
+  <div class='conf-badge'>INTERNAL USE ONLY</div>
+</div>
+<div class="content">
+<h1>VERITAS Test Document</h1>
+<h3>System Validation Report</h3>
+<h2>Executive Summary</h2>
+<p>This document validates that all six output engines produce correct, branded output from a single markdown source.</p>
+<h2>Architecture</h2>
+<p>VERITAS Docs is a sovereign document platform with multi-format export.</p>
+<table><thead><tr><th>Component</th><th>Status</th><th>Engine</th></tr></thead><tbody><tr><td>PDF</td><td>Active</td><td>ReportLab</td></tr><tr><td>DOCX</td><td>Active</td><td>python-docx</td></tr><tr><td>HTML</td><td>Active</td><td>Jinja2</td></tr><tr><td>MD</td><td>Active</td><td>Native</td></tr><tr><td>TXT</td><td>Active</td><td>Native</td></tr><tr><td>Slides</td><td>Active</td><td>Custom</td></tr></tbody></table>
+<h2>Key Features</h2>
+<ul>
+<li><strong>Multi-format export</strong> - one click, six formats</li>
+<li><strong>Branded output</strong> - gold-and-obsidian VERITAS design</li>
+<li><strong>Provenance receipt</strong> - every export is traced</li>
+<li><strong>Confidentiality stamps</strong> - classification watermarks</li>
+</ul>
+<blockquote>VERITAS does not determine what is true. It determines what survives.</blockquote>
+<h2>Conclusion</h2>
+<p>All engines operational. System ready for deployment.</p>
+</div>
+<div class="motto">Ω VERITAS does not determine what is true. It determines what survives disciplined attempts to falsify it.</div>
+<div class="footer"><span>Ω</span> &nbsp; VERITAS DOCS &nbsp;·&nbsp; Built by RJ Lopez | VERITAS Framework</div>
+</body>
+</html>

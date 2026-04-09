@@ -1,0 +1,578 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Ω Sovereign Docs</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/static/libs/codemirror.min.css">
+<link rel="stylesheet" href="/static/libs/monokai.min.css">
+<link rel="stylesheet" href="/static/styles.css">
+</head>
+<body>
+
+<!-- ─── TOP BAR ─── -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <span class="topbar-omega">Ω</span>
+    <span class="topbar-name">SOVEREIGN DOCS</span>
+  </div>
+  <nav class="tab-bar">
+    <button class="tab-btn active" data-tab="create">CREATE</button>
+    <button class="tab-btn" data-tab="analyze">ANALYZE</button>
+    <button class="tab-btn" data-tab="brief">BRIEF</button>
+    <button class="tab-btn" data-tab="library">LIBRARY</button>
+  </nav>
+  <div class="topbar-status" id="status-indicator">
+    <span class="status-dot"></span>
+    <span class="status-text">Ready</span>
+  </div>
+</header>
+
+<!-- ─── TAB PANELS ─── -->
+<main class="tab-content">
+
+  <!-- CREATE TAB -->
+  <section class="tab-panel active" id="tab-create">
+    <div class="create-layout">
+      <!-- Editor Pane -->
+      <div class="editor-pane">
+        <div class="editor-toolbar">
+          <span class="editor-label">MARKDOWN EDITOR</span>
+          <div class="editor-actions">
+            <button class="btn-refresh" id="toggle-preview-btn" onclick="togglePreview()">Show Preview</button>
+            <select id="template-select" class="config-select">
+              <option value="">— Template —</option>
+              <option value="blank">Blank Document</option>
+              <option value="investigation">Investigation Report</option>
+              <option value="technical">Technical Specification</option>
+              <option value="client">Client Deliverable</option>
+              <option value="case_study">Case Study</option>
+              <option value="meeting">Meeting Notes</option>
+            </select>
+          </div>
+        </div>
+        <div class="split-layout">
+          <div class="split-editor" id="split-editor">
+            <textarea id="editor" class="editor-textarea" spellcheck="false" placeholder="# Your Document Title
+  
+## Section One
+  
+Start writing your content here...
+  
+- Bullet points
+- **Bold text**
+- *Italic text*
+  
+## Section Two
+  
+| Column A | Column B |
+| -------- | -------- |
+| Data 1   | Data 2   |
+  
+> Blockquotes for callouts
+  
+```
+Code blocks
+```
+"></textarea>
+          </div>
+          <div class="split-preview hidden" id="split-preview">
+            <div id="preview-content" class="markdown-body"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Sidebar: Document Config + Export -->
+      <div class="sidebar-pane">
+        <div class="sidebar-section">
+          <div class="sidebar-title">DOCUMENT</div>
+          <label class="field-label">Title</label>
+          <input type="text" id="doc-title" class="field-input" placeholder="Document Title" value="Untitled Document">
+          <label class="field-label">Subtitle</label>
+          <input type="text" id="doc-subtitle" class="field-input" placeholder="Optional subtitle">
+          <label class="field-label">Classification</label>
+          <select id="doc-confidentiality" class="config-select full">
+            <option value="public">PUBLIC</option>
+            <option value="internal" selected>INTERNAL</option>
+            <option value="confidential">CONFIDENTIAL</option>
+            <option value="restricted">RESTRICTED</option>
+          </select>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-title">EXPORT FORMATS</div>
+          <div class="format-grid">
+            <label class="format-check"><input type="checkbox" value="pdf" checked><span class="format-tag">PDF</span></label>
+            <label class="format-check"><input type="checkbox" value="docx"><span class="format-tag">DOCX</span></label>
+            <label class="format-check"><input type="checkbox" value="html"><span class="format-tag">HTML</span></label>
+            <label class="format-check"><input type="checkbox" value="md"><span class="format-tag">MD</span></label>
+            <label class="format-check"><input type="checkbox" value="txt"><span class="format-tag">TXT</span></label>
+            <label class="format-check"><input type="checkbox" value="slides"><span class="format-tag">SLIDES</span></label>
+          </div>
+          <label class="format-check receipt-check"><input type="checkbox" checked disabled><span class="format-tag receipt-tag">+ RECEIPT (auto)</span></label>
+        </div>
+
+        <div class="sidebar-section">
+          <div class="sidebar-title">SOVEREIGN INTELLIGENCE</div>
+          <div class="format-grid">
+            <button class="btn-refresh" onclick="refineText('concise')" title="Make Concise">⬡ Concise</button>
+            <button class="btn-refresh" onclick="refineText('formal')" title="Formalize Tone">⬡ Formal</button>
+            <button class="btn-refresh" onclick="refineText('summary')" title="Add Exec Summary">⬡ Summarize</button>
+            <button class="btn-refresh" style="grid-column: 1 / -1; margin-top: 4px;" onclick="document.getElementById('tab-analyze').click();" title="Full Report">Full Analysis →</button>
+          </div>
+        </div>
+
+        <button class="btn-export" id="btn-export" onclick="exportDocument()">
+          <span class="btn-icon">◆</span> EXPORT SELECTED
+        </button>
+
+        <div id="export-result" class="export-result hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ANALYZE TAB -->
+  <section class="tab-panel" id="tab-analyze">
+    <div class="analyze-center">
+      <div class="upload-omega">Ω</div>
+      <div class="upload-brand">SOVEREIGN DOCS</div>
+      <div class="upload-sub">Document Analysis Engine</div>
+
+      <div class="drop-zone" id="drop-zone">
+        <span class="drop-icon">⬡</span>
+        <div class="drop-title">Drop Document to Analyze</div>
+        <div class="drop-hint">or click to browse</div>
+        <div class="drop-types">
+          <span class="type-tag">.MD</span><span class="type-tag">.TXT</span>
+          <span class="type-tag">.JSON</span><span class="type-tag">.DOCX</span>
+          <span class="type-tag">.PDF</span><span class="type-tag">.CSV</span>
+        </div>
+        <input type="file" id="analyze-file-input" accept=".md,.txt,.json,.docx,.pdf,.csv" style="display:none">
+      </div>
+
+      <div class="config-row">
+        <span class="config-label">Model</span>
+        <select class="config-select" id="model-select">
+          <option value="qwen3:8b">qwen3:8b (Complex)</option>
+          <option value="gemma3:4b">gemma3:4b (Fastest)</option>
+          <option value="phi4-mini">phi4-mini</option>
+          <option value="deepseek-r1:7b">deepseek-r1:7b (Reasoning)</option>
+        </select>
+      </div>
+
+      <div id="analyze-status" class="analyze-status hidden"></div>
+    </div>
+  </section>
+
+  <!-- BRIEF TAB -->
+  <section class="tab-panel" id="tab-brief">
+    <div class="brief-center">
+      <div class="upload-omega">Ω</div>
+      <div class="upload-brand">Intelligence Briefing</div>
+      <div class="upload-sub">Daily · Weekly · Custom</div>
+
+      <div class="brief-controls">
+        <button class="brief-btn" onclick="generateBrief('daily')">
+          <span class="brief-icon">☀</span>
+          <span class="brief-label">Daily Brief</span>
+          <span class="brief-desc">Today's intelligence summary</span>
+        </button>
+        <button class="brief-btn" onclick="generateBrief('weekly')">
+          <span class="brief-icon">◈</span>
+          <span class="brief-label">Weekly Rollup</span>
+          <span class="brief-desc">Past 7 days aggregated</span>
+        </button>
+        <button class="brief-btn" onclick="generateBrief('custom')">
+          <span class="brief-icon">⚙</span>
+          <span class="brief-label">Custom Brief</span>
+          <span class="brief-desc">Pick sources and date range</span>
+        </button>
+      </div>
+
+      <div id="brief-status" class="analyze-status hidden"></div>
+    </div>
+  </section>
+
+  <!-- LIBRARY TAB -->
+  <section class="tab-panel" id="tab-library">
+    <div class="library-header">
+      <div class="library-title">Document Library</div>
+      <div class="library-search-row">
+        <input type="text" class="field-input library-search" id="library-search" placeholder="Search documents...">
+        <button class="btn-refresh" onclick="loadLibrary()">↻ Refresh</button>
+      </div>
+    </div>
+    <div class="library-grid" id="library-grid">
+      <div class="library-empty">Loading library...</div>
+    </div>
+  </section>
+
+</main>
+
+<script src="/static/libs/codemirror.min.js"></script>
+<script src="/static/libs/markdown.min.js"></script>
+<script src="/static/libs/marked.min.js"></script>
+<script>
+// ── EDITOR INITIALIZATION ─────────────────────────────────
+let cmEditor = null;
+let previewTimeout = null;
+
+function renderPreview() {
+  const content = cmEditor.getValue();
+  document.getElementById('preview-content').innerHTML = marked.parse(content);
+}
+
+function initEditor() {
+  if (cmEditor) return;
+  cmEditor = CodeMirror.fromTextArea(document.getElementById('editor'), {
+    mode: 'markdown',
+    theme: 'monokai',
+    lineNumbers: true,
+    lineWrapping: true,
+    viewportMargin: Infinity
+  });
+  
+  cmEditor.on('change', () => {
+    clearTimeout(previewTimeout);
+    previewTimeout = setTimeout(renderPreview, 300);
+  });
+  renderPreview();
+  
+  // Load latest draft initially, then start auto-save
+  loadLatestDraft();
+  setInterval(saveDraft, 10000); // 10 seconds auto-save
+}
+
+async function saveDraft() {
+  if (!cmEditor) return;
+  const content = cmEditor.getValue().trim();
+  if (!content) return;
+  
+  const title = document.getElementById('doc-title').value;
+  try {
+    const resp = await fetch('/api/drafts/save', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content, title })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      // Optional: visual indicator here if desired
+    }
+  } catch (e) {
+    console.warn("Auto-save failed:", e);
+  }
+}
+
+async function refineText(mode) {
+  if (!cmEditor) return;
+  const content = cmEditor.getValue().trim();
+  if (!content) return;
+
+  const result = document.getElementById('export-result');
+  result.textContent = 'Refining text with AI...';
+  result.className = 'export-result';
+  setStatus('Refining text...', 'busy');
+
+  try {
+    const resp = await fetch('/api/refine', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ content, mode, model: 'qwen2.5:7b' })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      cmEditor.setValue(data.content);
+      result.textContent = '✓ AI Refinement complete';
+      result.className = 'export-result success';
+      setStatus('Refinement complete', 'success');
+    } else {
+      result.textContent = 'Error: ' + data.error;
+      result.className = 'export-result error';
+      setStatus('Refinement failed', 'error');
+    }
+  } catch (e) {
+    result.textContent = 'Error: ' + e.message;
+    result.className = 'export-result error';
+    setStatus('Refinement failed', 'error');
+  }
+  
+  setTimeout(() => {
+    result.className = 'export-result hidden';
+    setStatus('Ready');
+  }, 3000);
+}
+
+async function loadLatestDraft() {
+  try {
+    const resp = await fetch('/api/drafts/latest');
+    const data = await resp.json();
+    if (data.success && data.draft && cmEditor) {
+      const currentVal = cmEditor.getValue().trim();
+      const defaultPlaceholder = document.getElementById('editor').getAttribute('placeholder').trim();
+      
+      // If editor is empty or matches placeholder, load the draft
+      if (!currentVal || currentVal === defaultPlaceholder) {
+        cmEditor.setValue(data.draft.content);
+        if (data.draft.title) {
+          document.getElementById('doc-title').value = data.draft.title;
+        }
+      }
+    }
+  } catch (e) {
+    console.log("No previous draft found or loading failed.");
+  }
+}
+
+function togglePreview() {
+  const previewPanel = document.getElementById('split-preview');
+  const btn = document.getElementById('toggle-preview-btn');
+  if (previewPanel.classList.contains('hidden')) {
+    previewPanel.classList.remove('hidden');
+    btn.textContent = 'Hide Preview';
+  } else {
+    previewPanel.classList.add('hidden');
+    btn.textContent = 'Show Preview';
+  }
+}
+
+// ── TAB NAVIGATION ──────────────────────────────────────
+document.querySelectorAll('.tab-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+    btn.classList.add('active');
+    document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    if (btn.dataset.tab === 'library') loadLibrary();
+    if (btn.dataset.tab === 'create' && cmEditor) {
+      setTimeout(() => cmEditor.refresh(), 10);
+    }
+  });
+});
+
+// ── STATUS INDICATOR ────────────────────────────────────
+function setStatus(text, type = 'ready') {
+  const dot = document.querySelector('.status-dot');
+  const txt = document.querySelector('.status-text');
+  txt.textContent = text;
+  dot.className = 'status-dot ' + type;
+}
+
+// ── EXPORT ──────────────────────────────────────────────
+async function exportDocument() {
+  const btn = document.getElementById('btn-export');
+  const result = document.getElementById('export-result');
+
+  let content = '';
+  if (cmEditor) {
+    content = cmEditor.getValue().trim();
+  } else {
+    content = document.getElementById('editor').value.trim();
+  }
+  
+  if (!content) {
+    result.textContent = 'Error: No content to export';
+    result.className = 'export-result error';
+    return;
+  }
+
+  const formats = [];
+  document.querySelectorAll('.format-grid input[type=checkbox]:checked').forEach(cb => {
+    formats.push(cb.value);
+  });
+  if (formats.length === 0) {
+    result.textContent = 'Error: Select at least one format';
+    result.className = 'export-result error';
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="btn-icon spinner">◆</span> EXPORTING...';
+  setStatus('Exporting...', 'busy');
+  result.className = 'export-result hidden';
+
+  try {
+    const resp = await fetch('/api/export', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: document.getElementById('doc-title').value || 'Untitled Document',
+        subtitle: document.getElementById('doc-subtitle').value || null,
+        content: content,
+        formats: formats,
+        confidentiality: document.getElementById('doc-confidentiality').value,
+        source_name: 'editor_input.md',
+      })
+    });
+
+    const data = await resp.json();
+    if (data.success) {
+      let msg = `✓ Exported: ${Object.keys(data.formats).map(f => f.toUpperCase()).join(' + ')}`;
+      msg += `\nTrace: ${data.trace_id}`;
+      result.textContent = msg;
+      result.className = 'export-result success';
+      setStatus('Export complete', 'success');
+
+      // Auto-open the first format
+      const firstPath = Object.values(data.formats)[0];
+      if (firstPath && !firstPath.startsWith('ERROR')) {
+        fetch(`/api/open/${encodeURIComponent(firstPath)}`);
+      }
+    } else {
+      result.textContent = 'Error: ' + (data.error || 'Unknown error');
+      result.className = 'export-result error';
+      setStatus('Export failed', 'error');
+    }
+  } catch (e) {
+    result.textContent = 'Error: ' + e.message;
+    result.className = 'export-result error';
+    setStatus('Export failed', 'error');
+  }
+
+  btn.disabled = false;
+  btn.innerHTML = '<span class="btn-icon">◆</span> EXPORT SELECTED';
+  setTimeout(() => setStatus('Ready'), 5000);
+}
+
+// ── ANALYZE DROP ZONE ───────────────────────────────────
+const dropZone = document.getElementById('drop-zone');
+const analyzeInput = document.getElementById('analyze-file-input');
+
+dropZone.addEventListener('click', () => analyzeInput.click());
+analyzeInput.addEventListener('change', e => { if (e.target.files[0]) handleAnalyze(e.target.files[0]); });
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('drag-over');
+  if (e.dataTransfer.files[0]) handleAnalyze(e.dataTransfer.files[0]);
+});
+
+async function handleAnalyze(file) {
+  const status = document.getElementById('analyze-status');
+  status.textContent = `Analyzing: ${file.name} (${(file.size/1024).toFixed(1)} KB)...`;
+  status.className = 'analyze-status busy';
+  setStatus('Analyzing...', 'busy');
+
+  const form = new FormData();
+  form.append('file', file);
+  form.append('formats', 'pdf,html'); // we will probably want a special 'analysis report' output format eventually
+  form.append('title', file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' '));
+  form.append('model', document.getElementById('model-select').value);
+
+  try {
+    const resp = await fetch('/api/upload', { method: 'POST', body: form });
+    const data = await resp.json();
+    if (data.success) {
+      status.textContent = `✓ Analysis complete — Trace: ${data.trace_id}`;
+      status.className = 'analyze-status success';
+      setStatus('Analysis complete', 'success');
+      // Open receipt
+      if (data.receipt) fetch(`/api/open/${encodeURIComponent(data.receipt)}`);
+    } else {
+      status.textContent = 'Error: ' + (data.error || 'Unknown');
+      status.className = 'analyze-status error';
+    }
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+    status.className = 'analyze-status error';
+  }
+  setTimeout(() => setStatus('Ready'), 5000);
+}
+
+// ── BRIEF ───────────────────────────────────────────────
+async function generateBrief(type) {
+  const status = document.getElementById('brief-status');
+  status.textContent = `Generating ${type} brief...`;
+  status.className = 'analyze-status busy';
+  setStatus('Generating brief...', 'busy');
+
+  try {
+    const resp = await fetch('/api/generate_brief', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: type })
+    });
+    const data = await resp.json();
+    if (data.success) {
+      status.textContent = `✓ Brief generated! Transferring to editor...`;
+      status.className = 'analyze-status success';
+      document.getElementById('doc-title').value = "Sovereign Intelligence Brief";
+      document.getElementById('doc-subtitle').value = new Date().toLocaleDateString();
+      if (cmEditor) {
+        cmEditor.setValue(data.content);
+      } else {
+        document.getElementById('editor').value = data.content;
+      }
+      setTimeout(() => {
+        document.querySelector('.tab-btn[data-tab="create"]').click();
+        setStatus('Ready');
+      }, 1000);
+    } else {
+      status.textContent = 'Error: ' + data.error;
+      status.className = 'analyze-status error';
+      setStatus('Brief failed', 'error');
+    }
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+    status.className = 'analyze-status error';
+    setStatus('Brief failed', 'error');
+  }
+}
+
+// ── LIBRARY ─────────────────────────────────────────────
+async function loadLibrary() {
+  const grid = document.getElementById('library-grid');
+  try {
+    const resp = await fetch('/api/library');
+    const data = await resp.json();
+
+    if (data.total_documents === 0 && data.total_receipts === 0) {
+      grid.innerHTML = '<div class="library-empty">No documents yet. Create or analyze something!</div>';
+      return;
+    }
+
+    let html = '';
+    for (const doc of data.documents) {
+      const ext = doc.format.toUpperCase();
+      html += `
+        <div class="lib-card" onclick="fetch('/api/open/${encodeURIComponent(doc.path)}')">
+          <div class="lib-format">${ext}</div>
+          <div class="lib-name">${doc.name}</div>
+          <div class="lib-meta">${(doc.size / 1024).toFixed(1)} KB · ${new Date(doc.modified).toLocaleDateString()}</div>
+        </div>`;
+    }
+    grid.innerHTML = html || '<div class="library-empty">No documents yet.</div>';
+  } catch (e) {
+    grid.innerHTML = '<div class="library-empty">Error loading library: ' + e.message + '</div>';
+  }
+}
+
+// ── TEMPLATE LOADER ─────────────────────────────────────
+document.getElementById('template-select').addEventListener('change', async (e) => {
+  const templates = {
+    blank: '# Document Title\n\n## Overview\n\nYour content here.\n',
+    investigation: '# Investigation Report\n### Case Reference\n\n## Executive Summary\n\nBrief overview of findings.\n\n## Evidence\n\n- Finding 1\n- Finding 2\n\n## Analysis\n\nDetailed analysis...\n\n## Conclusions\n\n## Recommendations\n',
+    technical: '# Technical Specification\n### System Reference\n\n## Overview\n\n## Architecture\n\n## Components\n\n| Component | Description | Status |\n| --------- | ----------- | ------ |\n| Module A  | Core logic  | Active |\n\n## API Reference\n\n```\nGET /api/health\nPOST /api/data\n```\n\n## Deployment\n',
+    client: '# Client Deliverable\n### Project Name\n\n## Scope\n\n## Deliverables\n\n- Item 1\n- Item 2\n\n## Timeline\n\n| Phase | Duration | Status |\n| ----- | -------- | ------ |\n| Discovery | 2 weeks | Complete |\n\n## Next Steps\n',
+    case_study: '# Case Study\n### Subject Overview\n\n## Background\n\n## Challenge\n\n## Approach\n\n## Results\n\n> Key insight or quote\n\n## Lessons Learned\n',
+    meeting: '# Meeting Notes\n### Date / Attendees\n\n## Agenda\n\n- Topic 1\n- Topic 2\n\n## Discussion\n\n## Action Items\n\n- [ ] Task 1 — Owner\n- [ ] Task 2 — Owner\n\n## Next Meeting\n',
+  };
+  const tpl = templates[e.target.value];
+  if (tpl) {
+    if (cmEditor) {
+      cmEditor.setValue(tpl);
+    } else {
+      document.getElementById('editor').value = tpl;
+    }
+    document.getElementById('doc-title').value = tpl.split('\n')[0].replace('# ', '');
+  }
+});
+
+// ── INIT ────────────────────────────────────────────────
+initEditor();
+setStatus('Ready');
+</script>
+</body>
+</html>

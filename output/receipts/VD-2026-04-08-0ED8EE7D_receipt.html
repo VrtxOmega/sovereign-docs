@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Receipt — VD-2026-04-08-0ED8EE7D — VERITAS Docs</title>
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;500;600;700&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{--gold:#C9A84C;--gold-dim:#8B6B20;--gold-border:#2a1f08;--bg:#080808;--white:#F5EDD6;--gray:#4a4030;--fatal:#FF4444;--warning:#FF8C42;--pass:#7ABD7A;--tier1:#C9A84C;--tier2:#E8E8C0;--tier3:#9ABDD4}
+body{background:var(--bg);color:var(--white);font-family:'Share Tech Mono',monospace;font-size:13px;line-height:1.7;padding:0}
+.hero{text-align:center;padding:40px;border-bottom:1px solid var(--gold-border);position:relative}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:600px;height:300px;background:radial-gradient(ellipse at 50% 0%,rgba(201,168,76,.08) 0%,transparent 65%);pointer-events:none}
+.omega{font-family:'Orbitron',monospace;font-size:48px;font-weight:900;color:var(--gold);text-shadow:0 0 12px rgba(240,192,64,0.5);position:relative;z-index:1}
+.brand{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:14px;letter-spacing:6px;color:var(--gold);text-transform:uppercase;margin-top:6px;position:relative;z-index:1}
+.receipt-label{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:4px;color:var(--gold-dim);margin-top:4px;position:relative;z-index:1}
+.content{max-width:800px;margin:0 auto;padding:30px 24px}
+.meta-grid{display:grid;grid-template-columns:120px 1fr;gap:6px 14px;border:1px solid var(--gold-border);padding:16px;margin-bottom:24px;background:#0a0a0a}
+.meta-lbl{font-family:'Rajdhani',sans-serif;font-size:11px;letter-spacing:2px;color:var(--gold-dim);text-transform:uppercase}
+.meta-val{color:var(--white);opacity:.8;font-size:12px;word-break:break-all}
+.section-title{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:3px;color:var(--gold);margin:24px 0 12px;padding-bottom:6px;border-bottom:1px solid var(--gold-border)}
+table{width:100%;border-collapse:collapse;margin:12px 0}
+th{background:var(--gold);color:#0d0d0d;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;text-align:left;padding:8px 10px;text-transform:uppercase}
+td{padding:7px 10px;border-bottom:1px solid #1a1a1a;font-size:12px}
+tr:nth-child(even) td{background:#0a0a0a}
+.fmt-badge{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:2px;color:var(--gold);border:1px solid var(--gold-border);padding:2px 8px}
+.hash-cell{font-family:'Share Tech Mono',monospace;font-size:10px;color:var(--gold-dim)}
+.r-section{margin-bottom:20px}
+.r-sec-hdr{display:flex;align-items:center;gap:14px;margin:20px 0 12px;padding-bottom:8px;border-bottom:1px solid var(--gold-border)}
+.r-sec-num{font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:3px;color:var(--gold-dim);min-width:80px}
+.r-sec-ttl{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:13px;letter-spacing:3px;color:var(--gold);text-transform:uppercase}
+.r-item{border:1px solid var(--gold-border);margin-bottom:10px;background:#0a0a0a;position:relative;overflow:hidden}
+.r-item::before{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
+.r-item.fatal::before{background:#8B2020}.r-item.warning::before{background:#8B4A20}.r-item.pass::before{background:#2a6b2a}.r-item.note::before{background:var(--gold-border)}.r-item.info::before{background:var(--gray)}
+.r-item-hdr{padding:8px 14px;border-bottom:1px solid var(--gold-border);display:flex;justify-content:space-between;align-items:center}
+.r-item-lbl{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.r-sbadge{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:9px;letter-spacing:2px;padding:2px 8px;border:1px solid}
+.r-sbadge.fatal{color:var(--fatal);border-color:#8B2020}.r-sbadge.warning{color:var(--warning);border-color:#8B4A20}.r-sbadge.pass{color:var(--pass);border-color:#2a6b2a}.r-sbadge.note{color:var(--gold-dim);border-color:var(--gold-border)}.r-sbadge.info{color:var(--gray);border-color:var(--gray)}
+.r-item-body{padding:10px 14px;font-size:12px;opacity:.82;line-height:1.7}
+.r-finding{border:1px solid var(--gold-border);margin-bottom:10px;background:#0a0a0a;position:relative;overflow:hidden}
+.r-finding::after{content:'';position:absolute;top:0;left:0;width:3px;height:100%}
+.r-finding.t1::after{background:var(--tier1)}.r-finding.t2::after{background:var(--tier2)}.r-finding.t3::after{background:var(--tier3)}
+.r-fhdr{padding:8px 14px;border-bottom:1px solid var(--gold-border);display:flex;justify-content:space-between;align-items:center}
+.r-fttl{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:11px;letter-spacing:2px;text-transform:uppercase}
+.r-tbadge{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:9px;letter-spacing:2px;padding:2px 8px;border:1px solid}
+.r-tbadge.t1{color:var(--tier1);border-color:var(--tier1)}.r-tbadge.t2{color:var(--tier2);border-color:var(--tier2)}.r-tbadge.t3{color:var(--tier3);border-color:var(--tier3)}
+.r-fbody{padding:10px 14px;font-size:12px;opacity:.82;line-height:1.7}
+.r-subs{margin-top:8px;padding-left:12px;border-left:1px solid var(--gold-border)}
+.r-sub{color:var(--gold-dim);font-size:11px;margin-bottom:4px}.r-sub::before{content:'\2713  ';color:var(--gold)}
+.r-witness{border-left:3px solid var(--gold);padding:12px 16px;margin:16px 0;background:rgba(201,168,76,.04);font-size:13px;line-height:1.8}
+.seal{border:1px solid var(--gold);padding:20px;margin-top:28px;background:#0a0a0a;position:relative;box-shadow:0 0 20px rgba(201,168,76,.15)}
+.seal::before{content:'\03A9  SEALED RECEIPT';position:absolute;top:-10px;left:16px;background:#0a0a0a;padding:0 8px;font-family:'Rajdhani',sans-serif;font-weight:700;font-size:10px;letter-spacing:4px;color:var(--gold)}
+.seal-row{color:var(--gray);font-size:11px;margin-bottom:4px}.seal-row span{color:var(--gold-dim)}
+.seal-status{font-family:'Rajdhani',sans-serif;font-weight:700;font-size:12px;letter-spacing:4px;color:var(--gold);text-align:right;margin-top:12px;text-shadow:0 0 12px rgba(240,192,64,0.5)}
+.footer{text-align:center;padding:20px;border-top:1px solid var(--gold-border);margin-top:30px;font-family:'Rajdhani',sans-serif;font-size:10px;letter-spacing:4px;color:var(--gold-dim);text-transform:uppercase}
+.footer span{color:var(--gold)}
+</style>
+</head>
+<body>
+<div class="hero">
+  <div class="omega">Ω</div>
+  <div class="brand">VERITAS DOCS</div>
+  <div class="receipt-label">PROVENANCE RECEIPT</div>
+</div>
+<div class="content">
+  <div class="meta-grid">
+    <span class="meta-lbl">Trace ID</span><span class="meta-val">VD-2026-04-08-0ED8EE7D</span>
+    <span class="meta-lbl">Document</span><span class="meta-val">Sovereign Intelligence Brief</span>
+    <span class="meta-lbl">Source</span><span class="meta-val">editor_input.md</span>
+    <span class="meta-lbl">Source Hash</span><span class="meta-val">9238bb3603c65400a482fe9a67515c51...</span>
+    <span class="meta-lbl">Operation</span><span class="meta-val">CREATE</span>
+    <span class="meta-lbl">Version</span><span class="meta-val">1.0</span>
+    <span class="meta-lbl">Generated</span><span class="meta-val">April 08, 2026 — 19:43</span>
+    
+    <span class="meta-lbl">Classification</span><span class="meta-val" style="color:#4A90D9">INTERNAL</span>
+  </div>
+
+  <div class="section-title">EXPORTED FORMATS</div>
+  <table>
+    <thead><tr><th>Format</th><th>Filename</th><th>SHA-256</th></tr></thead>
+    <tbody>
+        <tr>
+          <td><span class="fmt-badge">PDF</span></td>
+          <td>Sovereign_Intelligence_Brief_VD-2026-04-08-0ED8EE7D.pdf</td>
+          <td class="hash-cell">bec06afb54b2fa3a...</td>
+        </tr></tbody>
+  </table>
+
+  
+
+  <div class="seal">
+    <div class="seal-row"><span>TRACE ID:</span> &nbsp; VD-2026-04-08-0ED8EE7D</div>
+    <div class="seal-row"><span>DOCUMENT:</span> &nbsp; Sovereign Intelligence Brief</div>
+    <div class="seal-row"><span>FORMATS:</span> &nbsp; PDF</div>
+    <div class="seal-row"><span>SOURCE HASH:</span> &nbsp; 9238bb3603c65400a482fe9a67515c51...</div>
+    <div class="seal-status">STATUS: SEALED — VD-2026-04-08-0ED8EE7D ✓</div>
+  </div>
+
+  <div class="footer"><span>Ω</span> &nbsp; VERITAS DOCS &nbsp;·&nbsp; PROVENANCE RECEIPT &nbsp;·&nbsp; <span>v1.0</span></div>
+</div>
+
+<!-- Machine-readable provenance data -->
+<script type="application/json" id="veritas-provenance">
+{
+  "trace_id": "VD-2026-04-08-0ED8EE7D",
+  "document_id": "ec864289d1dd4ab38238f965c7c523e0",
+  "operation": "create",
+  "source_name": "editor_input.md",
+  "source_hash": "9238bb3603c65400a482fe9a67515c51930f14ae543fa26bcaa7258d30672913",
+  "formats": {
+    "pdf": "C:\\Veritas_Lab\\veritas-docs\\output\\documents\\Sovereign_Intelligence_Brief_VD-2026-04-08-0ED8EE7D.pdf"
+  },
+  "hashes": {
+    "pdf": "bec06afb54b2fa3aee166ced5a23e2576704faad90f3fddc4134e9d2e986c0f5"
+  },
+  "version": "1.0",
+  "created_at": "2026-04-08T19:43:25.122086",
+  "model": null,
+  "brand": "veritas",
+  "confidentiality": "internal"
+}
+</script>
+</body>
+</html>
