@@ -41,6 +41,8 @@
           <span class="editor-label">MARKDOWN EDITOR</span>
           <div class="editor-actions">
             <button class="btn-refresh" id="toggle-preview-btn" onclick="togglePreview()">Show Preview</button>
+            <button class="btn-refresh" onclick="document.getElementById('import-file-input').click()" title="Import a file into the editor">⬡ Import File</button>
+            <input type="file" id="import-file-input" accept=".md,.txt,.json,.docx,.pdf,.csv" style="display:none">
             <select id="template-select" class="config-select">
               <option value="">— Template —</option>
               <option value="blank">Blank Document</option>
@@ -119,7 +121,7 @@ Code blocks
             <button class="btn-refresh" onclick="refineText('concise')" title="Make Concise">⬡ Concise</button>
             <button class="btn-refresh" onclick="refineText('formal')" title="Formalize Tone">⬡ Formal</button>
             <button class="btn-refresh" onclick="refineText('summary')" title="Add Exec Summary">⬡ Summarize</button>
-            <button class="btn-refresh" style="grid-column: 1 / -1; margin-top: 4px;" onclick="document.getElementById('tab-analyze').click();" title="Full Report">Full Analysis →</button>
+            <button class="btn-refresh" style="grid-column: 1 / -1; margin-top: 4px;" onclick="document.querySelector('.tab-btn[data-tab=\"analyze\"]').click();" title="Full Report">Full Analysis →</button>
           </div>
         </div>
 
@@ -279,7 +281,7 @@ async function refineText(mode) {
     const resp = await fetch('/api/refine', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ content, mode, model: 'qwen2.5:7b' })
+      body: JSON.stringify({ content, mode, model: 'qwen3:8b' })
     });
     const data = await resp.json();
     if (data.success) {
@@ -568,6 +570,54 @@ document.getElementById('template-select').addEventListener('change', async (e) 
     }
     document.getElementById('doc-title').value = tpl.split('\n')[0].replace('# ', '');
   }
+});
+
+// ── IMPORT FILE TO EDITOR ────────────────────────────────
+document.getElementById('import-file-input').addEventListener('change', async (e) => {
+  const file = e.target.files[0];
+  if (!file) return;
+
+  const result = document.getElementById('export-result');
+  result.textContent = `Importing: ${file.name}...`;
+  result.className = 'export-result';
+  setStatus('Importing file...', 'busy');
+
+  const form = new FormData();
+  form.append('file', file);
+
+  try {
+    const resp = await fetch('/api/import_file', { method: 'POST', body: form });
+    const data = await resp.json();
+    if (data.success) {
+      if (cmEditor) {
+        cmEditor.setValue(data.content);
+      } else {
+        document.getElementById('editor').value = data.content;
+      }
+      // Set document title from filename
+      const title = file.name.replace(/\.[^.]+$/, '').replace(/[_-]/g, ' ');
+      document.getElementById('doc-title').value = title;
+
+      result.textContent = `✓ Imported: ${file.name} (${(data.size / 1024).toFixed(1)} KB)`;
+      result.className = 'export-result success';
+      setStatus('Import complete', 'success');
+    } else {
+      result.textContent = 'Import error: ' + (data.error || 'Unknown');
+      result.className = 'export-result error';
+      setStatus('Import failed', 'error');
+    }
+  } catch (err) {
+    result.textContent = 'Import error: ' + err.message;
+    result.className = 'export-result error';
+    setStatus('Import failed', 'error');
+  }
+
+  // Reset the input so the same file can be re-imported
+  e.target.value = '';
+  setTimeout(() => {
+    result.className = 'export-result hidden';
+    setStatus('Ready');
+  }, 4000);
 });
 
 // ── INIT ────────────────────────────────────────────────

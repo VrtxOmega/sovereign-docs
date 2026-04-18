@@ -20,6 +20,7 @@ function startFlask() {
     cwd: path.join(__dirname, 'backend'),
     env: { ...process.env, FLASK_ENV: 'production' },
     stdio: ['pipe', 'pipe', 'pipe'],
+    windowsHide: true
   });
 
   flaskProcess.stdout.on('data', (data) => {
