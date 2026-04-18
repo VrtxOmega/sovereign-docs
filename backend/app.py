@@ -2,7 +2,7 @@
 VERITAS Docs — Flask Backend
 ==============================
 Unified server for document creation, analysis, and export.
-Port: 5060
+Port: 5070
 """
 
 import os
@@ -288,13 +288,54 @@ def refine_text():
     
     try:
         from intelligence.analyze_engine import refine_document_text
-        refined = refine_document_text(data["content"], data["mode"], data.get("model", "qwen2.5:7b"))
+        refined = refine_document_text(data["content"], data["mode"], data.get("model", "qwen3:8b"))
         return jsonify({"success": True, "content": refined})
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
+
+@app.route("/api/ollama_status")
+def ollama_status():
+    """Check if Ollama is reachable and list available models."""
+    try:
+        import requests as req
+        r = req.get("http://localhost:11434/api/tags", timeout=3)
+        if r.status_code == 200:
+            models = [m["name"] for m in r.json().get("models", [])]
+            return jsonify({"online": True, "models": models})
+    except Exception:
+        pass
+    return jsonify({"online": False, "models": []})
+
+
+@app.route("/api/import_file", methods=["POST"])
+def import_file():
+    """
+    Import a file and return its extracted text content for the editor.
+    Does NOT export — just extracts text from the uploaded file.
+    """
+    if "file" not in request.files:
+        return jsonify({"error": "No file uploaded"}), 400
+
+    f = request.files["file"]
+    filename = f.filename or "upload.txt"
+
+    try:
+        file_bytes = f.read()
+        from input.file_extractor import extract_text
+        content = extract_text(file_bytes, filename)
+        return jsonify({
+            "success": True,
+            "content": content,
+            "filename": filename,
+            "size": len(file_bytes),
+        })
+    except Exception as e:
+        return jsonify({"error": f"Import failed: {str(e)}"}), 422
+
+
 if __name__ == "__main__":
     print("\n  [OMEGA] VERITAS Docs - Backend Server")
     print(f"  Formats: {', '.join(SUPPORTED_FORMATS)}")
-    print("  http://localhost:5060\n")
+    print("  http://localhost:5070\n")
     app.run(debug=False, port=5070, host="127.0.0.1")
