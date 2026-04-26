@@ -199,20 +199,48 @@ def scrape_url():
 @app.route("/api/generate_brief", methods=["POST"])
 def generate_brief():
     """
-    Generate the Daily Intelligence Brief.
+    Generate an Intelligence Brief.
+
+    JSON body:
+      {
+        "type":  "daily" | "weekly" | "custom",
+        "start": "YYYY-MM-DD"   (optional, custom only),
+        "end":   "YYYY-MM-DD"   (optional, custom only)
+      }
     """
+    data = request.get_json(silent=True) or {}
+    brief_type = (data.get("type") or "daily").strip().lower()
     try:
-        from engines.brief_engine import generate_daily_brief
-        content = generate_daily_brief()
-        return jsonify({"success": True, "content": content})
+        from engines.brief_engine import generate_brief as gb
+        result = gb(
+            brief_type=brief_type,
+            start=data.get("start"),
+            end=data.get("end"),
+        )
+        # Always return 200 even on graceful 'offline' so the UI can show the
+        # informational stub instead of treating it as a fetch failure.
+        return jsonify(result)
     except Exception as e:
-        return jsonify({"error": f"Brief generation failed: {str(e)}"}), 500
+        return jsonify({
+            "success": False,
+            "type": brief_type,
+            "content": f"# Brief Engine Crashed\n\n```text\n{str(e)}\n```",
+            "vault_status": f"error: {e}",
+            "post_count": 0,
+            "window_label": "",
+        }), 500
 
 @app.route("/api/library")
 def list_library():
-    """List all generated documents and receipts."""
-    doc_dir = Path(__file__).resolve().parent / "output" / "documents"
-    receipt_dir = Path(__file__).resolve().parent / "output" / "receipts"
+    """
+    List all generated documents and receipts, grouped by Trace ID where
+    possible. Filenames produced by format_router.py follow the pattern:
+        <slug>_<TRACE_ID>.<ext>
+    so siblings of a single export share the same trace fragment.
+    """
+    project_root = Path(__file__).resolve().parent.parent
+    doc_dir = project_root / "output" / "documents"
+    receipt_dir = project_root / "output" / "receipts"
 
     documents = []
     if doc_dir.exists():
@@ -223,7 +251,9 @@ def list_library():
                     "path": str(f),
                     "size": f.stat().st_size,
                     "modified": datetime.fromtimestamp(f.stat().st_mtime).isoformat(),
-                    "format": f.suffix.lstrip('.'),
+                    "format": f.suffix.lstrip('.').lower(),
+                    "trace_id": _extract_trace_id(f.name),
+                    "slug":     _extract_slug(f.name),
                 })
 
     receipts = []
@@ -235,6 +265,7 @@ def list_library():
                     "path": str(f),
                     "size": f.stat().st_size,
                     "modified": datetime.fromtimestamp(f.stat().st_mtime).isoformat(),
+                    "trace_id": _extract_trace_id(f.name),
                 })
 
     return jsonify({
@@ -243,6 +274,60 @@ def list_library():
         "total_documents": len(documents),
         "total_receipts": len(receipts),
     })
+
+
+# ── Library helpers ─────────────────────────────────────────
+import re as _re
+_TRACE_RE = _re.compile(r'(VD-\d{4}-\d{2}-\d{2}-[A-F0-9]{8})', _re.IGNORECASE)
+
+
+def _extract_trace_id(name: str) -> str:
+    m = _TRACE_RE.search(name)
+    return m.group(1).upper() if m else ""
+
+
+def _extract_slug(name: str) -> str:
+    """Get a human-friendly title slug from a filename."""
+    base = Path(name).stem
+    # Strip the trace ID and trailing _slides suffix if present.
+    base = _TRACE_RE.sub("", base).rstrip("_-")
+    if base.endswith("_slides"):
+        base = base[:-len("_slides")]
+    return base.replace("_", " ").strip() or "Untitled"
+
+
+@app.route("/api/delete", methods=["POST"])
+def delete_files():
+    """
+    Delete a list of files from the output directory. Refuses to delete
+    anything outside <project_root>/output/ as a safety guard.
+    """
+    data = request.get_json(silent=True) or {}
+    paths = data.get("paths") or []
+    if not isinstance(paths, list) or not paths:
+        return jsonify({"error": "No paths provided"}), 400
+
+    project_root = Path(__file__).resolve().parent.parent
+    output_root = (project_root / "output").resolve()
+
+    deleted = []
+    skipped = []
+    for raw in paths:
+        try:
+            p = Path(raw).resolve()
+            # Refuse anything that escapes the output dir.
+            if not str(p).startswith(str(output_root)):
+                skipped.append({"path": raw, "reason": "outside output directory"})
+                continue
+            if not p.exists():
+                skipped.append({"path": raw, "reason": "missing"})
+                continue
+            p.unlink()
+            deleted.append(str(p))
+        except Exception as e:
+            skipped.append({"path": raw, "reason": str(e)})
+
+    return jsonify({"success": True, "deleted": deleted, "skipped": skipped})
 
 
 @app.route("/api/open/<path:filepath>")

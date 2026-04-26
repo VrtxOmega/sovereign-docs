@@ -169,44 +169,101 @@ Code blocks
 
   <!-- BRIEF TAB -->
   <section class="tab-panel" id="tab-brief">
-    <div class="brief-center">
-      <div class="upload-omega">Ω</div>
-      <div class="upload-brand">Intelligence Briefing</div>
-      <div class="upload-sub">Daily · Weekly · Custom</div>
+    <div class="brief-layout">
+      <!-- Left rail: brief picker -->
+      <aside class="brief-rail">
+        <div class="brief-rail-header">
+          <div class="upload-omega" style="font-size:48px;margin-bottom:4px">Ω</div>
+          <div class="upload-brand">Intelligence Briefing</div>
+          <div class="upload-sub">Vault · Moltbook · Daily Rollup</div>
+        </div>
 
-      <div class="brief-controls">
-        <button class="brief-btn" onclick="generateBrief('daily')">
-          <span class="brief-icon">☀</span>
-          <span class="brief-label">Daily Brief</span>
-          <span class="brief-desc">Today's intelligence summary</span>
+        <div class="brief-types">
+          <button class="brief-type active" data-brief-type="daily">
+            <span class="brief-type-icon">☀</span>
+            <span class="brief-type-body">
+              <span class="brief-type-label">Daily</span>
+              <span class="brief-type-desc">Past 48 hours</span>
+            </span>
+          </button>
+          <button class="brief-type" data-brief-type="weekly">
+            <span class="brief-type-icon">◈</span>
+            <span class="brief-type-body">
+              <span class="brief-type-label">Weekly</span>
+              <span class="brief-type-desc">Past 7 days</span>
+            </span>
+          </button>
+          <button class="brief-type" data-brief-type="custom">
+            <span class="brief-type-icon">⚙</span>
+            <span class="brief-type-body">
+              <span class="brief-type-label">Custom</span>
+              <span class="brief-type-desc">Pick a date range</span>
+            </span>
+          </button>
+        </div>
+
+        <div class="brief-custom-range" id="brief-range" hidden>
+          <label class="field-label">From</label>
+          <input type="date" id="brief-start" class="field-input">
+          <label class="field-label">To</label>
+          <input type="date" id="brief-end" class="field-input">
+        </div>
+
+        <button class="btn-export" id="brief-generate">
+          <span class="btn-icon">◆</span> GENERATE BRIEF
         </button>
-        <button class="brief-btn" onclick="generateBrief('weekly')">
-          <span class="brief-icon">◈</span>
-          <span class="brief-label">Weekly Rollup</span>
-          <span class="brief-desc">Past 7 days aggregated</span>
-        </button>
-        <button class="brief-btn" onclick="generateBrief('custom')">
-          <span class="brief-icon">⚙</span>
-          <span class="brief-label">Custom Brief</span>
-          <span class="brief-desc">Pick sources and date range</span>
-        </button>
+
+        <div id="brief-meta" class="brief-meta"></div>
+      </aside>
+
+      <!-- Right: live preview pane -->
+      <div class="brief-preview-pane">
+        <div class="sub-toolbar">
+          <span class="editor-label" id="brief-preview-title">PREVIEW</span>
+          <div class="editor-actions">
+            <span class="extract-meta" id="brief-status-pill"></span>
+            <button class="btn-refresh" id="brief-copy" disabled>⧉ Copy</button>
+            <button class="btn-export" id="brief-send" disabled style="margin-top:0;padding:6px 14px;font-size:11px;width:auto">
+              <span class="btn-icon">◆</span> SEND TO EDITOR
+            </button>
+          </div>
+        </div>
+        <div id="brief-preview" class="brief-preview markdown-body">
+          <div class="brief-preview-empty">Pick a brief type and click <strong>GENERATE BRIEF</strong> to see a preview here. Nothing is sent to the editor until you confirm.</div>
+        </div>
       </div>
-
-      <div id="brief-status" class="analyze-status hidden"></div>
     </div>
   </section>
 
   <!-- LIBRARY TAB -->
   <section class="tab-panel" id="tab-library">
     <div class="library-header">
-      <div class="library-title">Document Library</div>
-      <div class="library-search-row">
-        <input type="text" class="field-input library-search" id="library-search" placeholder="Search documents...">
+      <div class="library-title-row">
+        <div class="library-title">Document Library</div>
+        <div class="library-stats" id="library-stats">0 documents · 0 receipts</div>
+      </div>
+      <div class="library-toolbar">
+        <input type="text" class="field-input library-search" id="library-search" placeholder="Filter by title, format, or trace ID…">
+        <select class="config-select" id="library-sort">
+          <option value="newest" selected>Newest first</option>
+          <option value="oldest">Oldest first</option>
+          <option value="name-asc">Name (A→Z)</option>
+          <option value="name-desc">Name (Z→A)</option>
+          <option value="size-desc">Largest first</option>
+        </select>
+        <select class="config-select" id="library-filter">
+          <option value="all" selected>All formats</option>
+          <option value="pdf">PDF only</option>
+          <option value="docx">DOCX only</option>
+          <option value="html">HTML only</option>
+          <option value="md">Markdown only</option>
+          <option value="receipts">Receipts</option>
+        </select>
         <button class="btn-refresh" onclick="loadLibrary()">↻ Refresh</button>
       </div>
     </div>
-    <div class="library-grid" id="library-grid">
-      <div class="library-empty">Loading library...</div>
+    <div class="library-body" id="library-body">
+      <div class="library-empty">Loading library…</div>
     </div>
   </section>
 
@@ -484,72 +541,350 @@ async function handleAnalyze(file) {
 }
 
 // ── BRIEF ───────────────────────────────────────────────
-async function generateBrief(type) {
-  const status = document.getElementById('brief-status');
-  status.textContent = `Generating ${type} brief...`;
-  status.className = 'analyze-status busy';
-  setStatus('Generating brief...', 'busy');
+let briefSelectedType = 'daily';
+let briefLastResult = null;
+
+function setBriefType(type) {
+  briefSelectedType = type;
+  document.querySelectorAll('.brief-type').forEach(b => {
+    b.classList.toggle('active', b.dataset.briefType === type);
+  });
+  document.getElementById('brief-range').hidden = (type !== 'custom');
+}
+
+document.querySelectorAll('.brief-type').forEach(btn => {
+  btn.addEventListener('click', () => setBriefType(btn.dataset.briefType));
+});
+
+// Default custom range to past 7 days, end = today.
+(function defaultBriefDates() {
+  const end = new Date();
+  const start = new Date();
+  start.setDate(start.getDate() - 7);
+  const iso = d => d.toISOString().slice(0, 10);
+  document.getElementById('brief-start').value = iso(start);
+  document.getElementById('brief-end').value   = iso(end);
+})();
+
+async function generateBrief() {
+  const previewEl = document.getElementById('brief-preview');
+  const titleEl   = document.getElementById('brief-preview-title');
+  const pillEl    = document.getElementById('brief-status-pill');
+  const metaEl    = document.getElementById('brief-meta');
+  const btnGen    = document.getElementById('brief-generate');
+  const btnSend   = document.getElementById('brief-send');
+  const btnCopy   = document.getElementById('brief-copy');
+
+  const body = { type: briefSelectedType };
+  if (briefSelectedType === 'custom') {
+    body.start = document.getElementById('brief-start').value;
+    body.end   = document.getElementById('brief-end').value;
+    if (!body.start || !body.end) {
+      previewEl.innerHTML = '<div class="brief-preview-empty" style="color:var(--fatal)">Pick a start and end date for a custom brief.</div>';
+      return;
+    }
+  }
+
+  btnGen.disabled = true;
+  btnSend.disabled = true;
+  btnCopy.disabled = true;
+  btnGen.innerHTML = '<span class="btn-icon spinner">◆</span> GENERATING…';
+  pillEl.textContent = 'Generating…';
+  pillEl.style.color = 'var(--gold)';
+  setStatus('Generating brief…', 'busy');
+  previewEl.innerHTML = '<div class="brief-preview-empty">Connecting to the Vault bridge…</div>';
 
   try {
     const resp = await fetch('/api/generate_brief', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: type })
+      body: JSON.stringify(body)
     });
     const data = await resp.json();
-    if (data.success) {
-      status.textContent = `✓ Brief generated! Transferring to editor...`;
-      status.className = 'analyze-status success';
-      document.getElementById('doc-title').value = "Sovereign Intelligence Brief";
-      document.getElementById('doc-subtitle').value = new Date().toLocaleDateString();
-      if (cmEditor) {
-        cmEditor.setValue(data.content);
-      } else {
-        document.getElementById('editor').value = data.content;
-      }
-      setTimeout(() => {
-        document.querySelector('.tab-btn[data-tab="create"]').click();
-        setStatus('Ready');
-      }, 1000);
+
+    briefLastResult = data;
+    titleEl.textContent = (data.window_label || 'PREVIEW').toUpperCase();
+
+    if (data.content) {
+      previewEl.innerHTML = marked.parse(data.content);
     } else {
-      status.textContent = 'Error: ' + data.error;
-      status.className = 'analyze-status error';
+      previewEl.innerHTML = '<div class="brief-preview-empty" style="color:var(--fatal)">No content returned.</div>';
+    }
+
+    if (data.vault_status === 'ok') {
+      pillEl.textContent = `✓ ${data.post_count} signal${data.post_count === 1 ? '' : 's'}`;
+      pillEl.style.color = 'var(--pass)';
+      setStatus('Brief generated', 'success');
+    } else if (data.vault_status === 'offline') {
+      pillEl.textContent = '○ Vault offline';
+      pillEl.style.color = 'var(--warning)';
+      setStatus('Vault offline', 'success');
+    } else {
+      pillEl.textContent = '✗ Error';
+      pillEl.style.color = 'var(--fatal)';
       setStatus('Brief failed', 'error');
     }
+
+    metaEl.textContent = data.window_label
+      ? `${data.window_label} · ${data.post_count} signal${data.post_count === 1 ? '' : 's'}`
+      : '';
+
+    btnSend.disabled = !data.content;
+    btnCopy.disabled = !data.content;
   } catch (e) {
-    status.textContent = 'Error: ' + e.message;
-    status.className = 'analyze-status error';
+    previewEl.innerHTML = `<div class="brief-preview-empty" style="color:var(--fatal)">Network error: ${e.message}</div>`;
+    pillEl.textContent = '✗ Error';
+    pillEl.style.color = 'var(--fatal)';
     setStatus('Brief failed', 'error');
+  } finally {
+    btnGen.disabled = false;
+    btnGen.innerHTML = '<span class="btn-icon">◆</span> GENERATE BRIEF';
+    setTimeout(() => setStatus('Ready'), 4000);
   }
 }
+
+document.getElementById('brief-generate').addEventListener('click', generateBrief);
+
+document.getElementById('brief-copy').addEventListener('click', async () => {
+  if (!briefLastResult || !briefLastResult.content) return;
+  try {
+    await navigator.clipboard.writeText(briefLastResult.content);
+    document.getElementById('brief-status-pill').textContent = 'Copied ✓';
+  } catch {
+    document.getElementById('brief-status-pill').textContent = 'Copy failed';
+  }
+});
+
+document.getElementById('brief-send').addEventListener('click', () => {
+  if (!briefLastResult || !briefLastResult.content) return;
+  document.getElementById('doc-title').value =
+    briefSelectedType === 'daily'  ? 'Daily Intelligence Rollup' :
+    briefSelectedType === 'weekly' ? 'Weekly Intelligence Rollup' :
+                                     'Custom Intelligence Brief';
+  document.getElementById('doc-subtitle').value = briefLastResult.window_label || new Date().toLocaleDateString();
+  if (cmEditor) cmEditor.setValue(briefLastResult.content);
+  else document.getElementById('editor').value = briefLastResult.content;
+  document.querySelector('.tab-btn[data-tab="create"]').click();
+  setStatus('Brief sent to editor', 'success');
+  setTimeout(() => setStatus('Ready'), 3000);
+});
 
 // ── LIBRARY ─────────────────────────────────────────────
+let libraryRaw = { documents: [], receipts: [], total_documents: 0, total_receipts: 0 };
+
+const FORMAT_META = {
+  pdf:    { color: '#FF8C42', label: 'PDF'    },
+  docx:   { color: '#4A8FE0', label: 'DOCX'   },
+  html:   { color: '#7ABD7A', label: 'HTML'   },
+  md:     { color: '#C9A84C', label: 'MD'     },
+  txt:    { color: '#888888', label: 'TXT'    },
+  pptx:   { color: '#D87C56', label: 'PPTX'   },
+  json:   { color: '#999955', label: 'JSON'   },
+};
+
 async function loadLibrary() {
-  const grid = document.getElementById('library-grid');
+  const body = document.getElementById('library-body');
+  body.innerHTML = '<div class="library-empty">Loading library…</div>';
+
   try {
     const resp = await fetch('/api/library');
-    const data = await resp.json();
-
-    if (data.total_documents === 0 && data.total_receipts === 0) {
-      grid.innerHTML = '<div class="library-empty">No documents yet. Create or analyze something!</div>';
-      return;
-    }
-
-    let html = '';
-    for (const doc of data.documents) {
-      const ext = doc.format.toUpperCase();
-      html += `
-        <div class="lib-card" onclick="fetch('/api/open/${encodeURIComponent(doc.path)}')">
-          <div class="lib-format">${ext}</div>
-          <div class="lib-name">${doc.name}</div>
-          <div class="lib-meta">${(doc.size / 1024).toFixed(1)} KB · ${new Date(doc.modified).toLocaleDateString()}</div>
-        </div>`;
-    }
-    grid.innerHTML = html || '<div class="library-empty">No documents yet.</div>';
+    libraryRaw = await resp.json();
+    renderLibrary();
   } catch (e) {
-    grid.innerHTML = '<div class="library-empty">Error loading library: ' + e.message + '</div>';
+    body.innerHTML = `<div class="library-empty" style="color:var(--fatal)">Error loading library: ${e.message}</div>`;
   }
 }
+
+function renderLibrary() {
+  const body = document.getElementById('library-body');
+  const stats = document.getElementById('library-stats');
+  const search = (document.getElementById('library-search').value || '').trim().toLowerCase();
+  const sort = document.getElementById('library-sort').value;
+  const filter = document.getElementById('library-filter').value;
+
+  stats.textContent = `${libraryRaw.total_documents} document${libraryRaw.total_documents === 1 ? '' : 's'} · ${libraryRaw.total_receipts} receipt${libraryRaw.total_receipts === 1 ? '' : 's'}`;
+
+  if (libraryRaw.total_documents === 0 && libraryRaw.total_receipts === 0) {
+    body.innerHTML = '<div class="library-empty">No documents yet.<br><br>Head to <strong>CREATE</strong> or <strong>ANALYZE</strong> and export something — it will show up here grouped by Trace ID.</div>';
+    return;
+  }
+
+  // Group documents by trace_id.
+  const groups = new Map();
+  for (const d of libraryRaw.documents) {
+    const key = d.trace_id || ('FILE:' + d.path);
+    if (!groups.has(key)) {
+      groups.set(key, {
+        trace_id: d.trace_id,
+        slug: d.slug || d.name,
+        modified: d.modified,
+        files: [],
+      });
+    }
+    const g = groups.get(key);
+    g.files.push(d);
+    if (d.modified > g.modified) g.modified = d.modified;
+  }
+  let groupList = Array.from(groups.values());
+
+  if (filter !== 'all' && filter !== 'receipts') {
+    groupList = groupList
+      .map(g => ({ ...g, files: g.files.filter(f => f.format === filter) }))
+      .filter(g => g.files.length > 0);
+  }
+
+  if (search) {
+    groupList = groupList.filter(g => {
+      const hay = (g.slug + ' ' + g.trace_id + ' ' + g.files.map(f => f.format).join(' ')).toLowerCase();
+      return hay.includes(search);
+    });
+  }
+
+  groupList.sort((a, b) => {
+    if (sort === 'newest')    return (b.modified || '').localeCompare(a.modified || '');
+    if (sort === 'oldest')    return (a.modified || '').localeCompare(b.modified || '');
+    if (sort === 'name-asc')  return a.slug.localeCompare(b.slug);
+    if (sort === 'name-desc') return b.slug.localeCompare(a.slug);
+    if (sort === 'size-desc') {
+      const aSize = a.files.reduce((s, f) => s + f.size, 0);
+      const bSize = b.files.reduce((s, f) => s + f.size, 0);
+      return bSize - aSize;
+    }
+    return 0;
+  });
+
+  // Receipts section (only when filter == 'all' or 'receipts').
+  let receiptsHtml = '';
+  if ((filter === 'all' || filter === 'receipts') && libraryRaw.receipts.length > 0) {
+    let receipts = libraryRaw.receipts;
+    if (search) {
+      receipts = receipts.filter(r => (r.name + ' ' + r.trace_id).toLowerCase().includes(search));
+    }
+    if (receipts.length > 0) {
+      receiptsHtml = `
+        <div class="lib-section">
+          <div class="lib-section-header">CRYPTOGRAPHIC RECEIPTS · ${receipts.length}</div>
+          <div class="lib-receipts">
+            ${receipts.map(r => `
+              <div class="lib-receipt">
+                <span class="lib-receipt-icon">⧁</span>
+                <span class="lib-receipt-trace">${escapeHtml(r.trace_id || r.name)}</span>
+                <span class="lib-receipt-date">${formatDate(r.modified)}</span>
+                <button class="lib-action-btn" data-action="open" data-path="${escapeHtml(r.path)}">Open</button>
+                <button class="lib-action-btn delete" data-action="delete" data-paths='${escapeHtml(JSON.stringify([r.path]))}'>✕</button>
+              </div>
+            `).join('')}
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  let docsHtml = '';
+  if (filter !== 'receipts' && groupList.length > 0) {
+    docsHtml = `
+      <div class="lib-section">
+        <div class="lib-section-header">DOCUMENTS · ${groupList.length}</div>
+        <div class="library-grid">
+          ${groupList.map(g => renderGroupCard(g)).join('')}
+        </div>
+      </div>
+    `;
+  } else if (filter !== 'receipts') {
+    docsHtml = '<div class="library-empty">No documents match these filters.</div>';
+  }
+
+  body.innerHTML = receiptsHtml + docsHtml;
+  wireLibraryActions();
+}
+
+function renderGroupCard(g) {
+  const totalSize = g.files.reduce((s, f) => s + f.size, 0);
+  const formats = g.files
+    .slice()
+    .sort((a, b) => a.format.localeCompare(b.format))
+    .map(f => {
+      const meta = FORMAT_META[f.format] || { color: '#888888', label: (f.format || '?').toUpperCase() };
+      return `<button class="lib-format-chip" style="border-color:${meta.color};color:${meta.color}"
+                       data-action="open" data-path="${escapeHtml(f.path)}"
+                       title="${escapeHtml(f.name)} — ${(f.size/1024).toFixed(1)} KB">${meta.label}</button>`;
+    }).join('');
+
+  const allPaths = JSON.stringify(g.files.map(f => f.path));
+
+  return `
+    <div class="lib-card">
+      <div class="lib-card-header">
+        <div class="lib-card-title">${escapeHtml(g.slug)}</div>
+        ${g.trace_id ? `<div class="lib-card-trace">${escapeHtml(g.trace_id)}</div>` : ''}
+      </div>
+      <div class="lib-card-formats">${formats}</div>
+      <div class="lib-card-footer">
+        <span class="lib-card-meta">${g.files.length} file${g.files.length === 1 ? '' : 's'} · ${(totalSize/1024).toFixed(1)} KB · ${formatDate(g.modified)}</span>
+        <button class="lib-action-btn delete" data-action="delete" data-paths='${escapeHtml(allPaths)}' title="Delete all files in this export">✕</button>
+      </div>
+    </div>
+  `;
+}
+
+function wireLibraryActions() {
+  document.querySelectorAll('#library-body [data-action="open"]').forEach(el => {
+    el.addEventListener('click', e => {
+      e.stopPropagation();
+      const path = el.dataset.path;
+      if (path) fetch(`/api/open/${encodeURIComponent(path)}`);
+    });
+  });
+  document.querySelectorAll('#library-body [data-action="delete"]').forEach(el => {
+    el.addEventListener('click', async e => {
+      e.stopPropagation();
+      let paths = [];
+      try { paths = JSON.parse(el.dataset.paths || '[]'); } catch { return; }
+      if (paths.length === 0) return;
+      const label = paths.length === 1 ? 'this file' : `these ${paths.length} files`;
+      if (!confirm(`Permanently delete ${label}?`)) return;
+      try {
+        await fetch('/api/delete', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ paths })
+        });
+        await loadLibrary();
+      } catch (err) {
+        alert('Delete failed: ' + err.message);
+      }
+    });
+  });
+}
+
+function escapeHtml(s) {
+  return String(s == null ? '' : s)
+    .replaceAll('&', '&amp;')
+    .replaceAll('<', '&lt;')
+    .replaceAll('>', '&gt;')
+    .replaceAll('"', '&quot;')
+    .replaceAll("'", '&#39;');
+}
+
+function formatDate(iso) {
+  if (!iso) return '—';
+  try {
+    const d = new Date(iso);
+    return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
+      + ' ' + d.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' });
+  } catch { return iso; }
+}
+
+// Wire search + sort + filter to a debounced re-render.
+let libraryDebounce = null;
+['library-search', 'library-sort', 'library-filter'].forEach(id => {
+  const el = document.getElementById(id);
+  const ev = el.tagName === 'SELECT' ? 'change' : 'input';
+  el.addEventListener(ev, () => {
+    clearTimeout(libraryDebounce);
+    libraryDebounce = setTimeout(renderLibrary, 100);
+  });
+});
 
 // ── TEMPLATE LOADER ─────────────────────────────────────
 document.getElementById('template-select').addEventListener('change', async (e) => {
