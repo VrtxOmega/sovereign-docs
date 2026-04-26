@@ -19,6 +19,8 @@
   </div>
   <nav class="tab-bar">
     <button class="tab-btn active" data-tab="create">CREATE</button>
+    <button class="tab-btn" data-tab="extract">EXTRACT</button>
+    <button class="tab-btn" data-tab="forge">FORGE</button>
     <button class="tab-btn" data-tab="analyze">ANALYZE</button>
     <button class="tab-btn" data-tab="brief">BRIEF</button>
     <button class="tab-btn" data-tab="library">LIBRARY</button>
@@ -130,6 +132,154 @@ Code blocks
         </button>
 
         <div id="export-result" class="export-result hidden"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- EXTRACT TAB — OCR text extraction -->
+  <section class="tab-panel" id="tab-extract">
+    <div class="extract-layout">
+      <div class="extract-left">
+        <div class="sub-toolbar">
+          <span class="editor-label">IMAGE → TEXT</span>
+          <div class="editor-actions">
+            <select id="ocr-language" class="config-select">
+              <option value="eng" selected>English</option>
+              <option value="spa">Spanish</option>
+              <option value="fra">French</option>
+              <option value="deu">German</option>
+              <option value="ita">Italian</option>
+              <option value="por">Portuguese</option>
+            </select>
+            <button class="btn-refresh" id="ocr-clear" title="Clear">✕ Clear</button>
+          </div>
+        </div>
+
+        <div class="extract-canvas">
+          <div class="drop-zone extract-drop" id="ocr-drop">
+            <span class="drop-icon">⌖</span>
+            <div class="drop-title">Drop Image to Extract Text</div>
+            <div class="drop-hint">or click to browse</div>
+            <div class="drop-types">
+              <span class="type-tag">.PNG</span><span class="type-tag">.JPG</span>
+              <span class="type-tag">.BMP</span><span class="type-tag">.TIFF</span>
+              <span class="type-tag">.GIF</span>
+            </div>
+            <input type="file" id="ocr-input" accept="image/*" style="display:none">
+          </div>
+
+          <div class="extract-preview hidden" id="ocr-preview-wrap">
+            <img id="ocr-preview" alt="Source">
+          </div>
+        </div>
+
+        <div class="extract-progress hidden" id="ocr-progress">
+          <div class="extract-progress-bar"><div class="extract-progress-fill" id="ocr-progress-fill"></div></div>
+          <span class="extract-progress-label" id="ocr-progress-label">Initializing…</span>
+        </div>
+      </div>
+
+      <div class="extract-right">
+        <div class="sub-toolbar">
+          <span class="editor-label">EXTRACTED TEXT</span>
+          <div class="editor-actions">
+            <span class="extract-meta" id="ocr-meta"></span>
+          </div>
+        </div>
+
+        <textarea id="ocr-output" class="extract-output" spellcheck="false"
+                  placeholder="Extracted text will appear here…"></textarea>
+
+        <div class="extract-actions">
+          <button class="btn-refresh" id="ocr-copy" disabled>⧉ Copy</button>
+          <button class="btn-refresh" id="ocr-download" disabled>↓ Download .txt</button>
+          <button class="btn-export" id="ocr-send" disabled>
+            <span class="btn-icon">◆</span> SEND TO CREATE
+          </button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- FORGE TAB — colored ASCII art -->
+  <section class="tab-panel" id="tab-forge">
+    <div class="extract-layout">
+      <div class="extract-left">
+        <div class="sub-toolbar">
+          <span class="editor-label">IMAGE → ASCII</span>
+          <div class="editor-actions">
+            <button class="btn-refresh" id="forge-clear" title="Clear">✕ Clear</button>
+          </div>
+        </div>
+
+        <div class="extract-canvas">
+          <div class="drop-zone extract-drop" id="forge-drop">
+            <span class="drop-icon">⧫</span>
+            <div class="drop-title">Drop Image to Forge ASCII</div>
+            <div class="drop-hint">or click to browse</div>
+            <div class="drop-types">
+              <span class="type-tag">.PNG</span><span class="type-tag">.JPG</span>
+              <span class="type-tag">.GIF</span><span class="type-tag">.WEBP</span>
+            </div>
+            <input type="file" id="forge-input" accept="image/*" style="display:none">
+          </div>
+
+          <div class="extract-preview hidden" id="forge-preview-wrap">
+            <img id="forge-preview" alt="Source">
+          </div>
+        </div>
+
+        <div class="forge-controls">
+          <div class="forge-control">
+            <label class="field-label">Width <span id="forge-width-val">120</span></label>
+            <input type="range" id="forge-width" min="40" max="240" value="120" step="4" class="forge-slider">
+          </div>
+          <div class="forge-control">
+            <label class="field-label">Charset</label>
+            <select id="forge-charset" class="config-select full">
+              <option value="detailed" selected>Detailed (10 levels)</option>
+              <option value="classic">Classic (5 levels)</option>
+              <option value="blocks">Blocks (4 levels)</option>
+              <option value="minimal">Minimal (3 chars)</option>
+            </select>
+          </div>
+          <div class="forge-control">
+            <label class="field-label">Style</label>
+            <select id="forge-style" class="config-select full">
+              <option value="color" selected>Color (HTML)</option>
+              <option value="mono-gold">Mono Gold</option>
+              <option value="mono">Mono White</option>
+              <option value="plain">Plain Text</option>
+            </select>
+          </div>
+          <div class="forge-control">
+            <label class="format-check" style="margin-top:8px">
+              <input type="checkbox" id="forge-invert">
+              <span class="format-tag">INVERT</span>
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <div class="extract-right">
+        <div class="sub-toolbar">
+          <span class="editor-label">ASCII OUTPUT</span>
+          <div class="editor-actions">
+            <span class="extract-meta" id="forge-meta"></span>
+          </div>
+        </div>
+
+        <div id="forge-output" class="forge-output">
+          <div class="forge-output-empty">Drop an image to begin…</div>
+        </div>
+
+        <div class="extract-actions">
+          <button class="btn-refresh" id="forge-copy" disabled>⧉ Copy</button>
+          <button class="btn-refresh" id="forge-download" disabled>↓ Download .html</button>
+          <button class="btn-export" id="forge-send" disabled>
+            <span class="btn-icon">◆</span> INSERT INTO EDITOR
+          </button>
+        </div>
       </div>
     </div>
   </section>
@@ -272,6 +422,8 @@ Code blocks
 <script src="/static/libs/codemirror.min.js"></script>
 <script src="/static/libs/markdown.min.js"></script>
 <script src="/static/libs/marked.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tesseract.js/5.0.4/tesseract.min.js"></script>
+<script src="/static/extract_forge.js" defer></script>
 <script>
 // ── EDITOR INITIALIZATION ─────────────────────────────────
 let cmEditor = null;
@@ -958,6 +1110,16 @@ document.getElementById('import-file-input').addEventListener('change', async (e
 // ── INIT ────────────────────────────────────────────────
 initEditor();
 setStatus('Ready');
+
+// Expose helpers for the EXTRACT/FORGE module (extract_forge.js).
+// The external module reads `window.cmEditor` to push OCR text or ASCII
+// blocks into the markdown editor, and `window.setStatus` to surface
+// progress/results in the top-right status pill.
+Object.defineProperty(window, 'cmEditor', {
+  get: () => cmEditor,
+  configurable: true,
+});
+window.setStatus = setStatus;
 </script>
 </body>
 </html>
