@@ -1,0 +1,94 @@
+{
+  "version": "1.0.0",
+  "timestamp": "2026-04-30T00:23:53.633Z",
+  "target": {
+    "name": "sovereign-docs",
+    "repo": "/tmp/sovereign-docs",
+    "commitHash": "bcd79c9a614d45f399f7db9ad34e965a46276be0",
+    "branch": "main"
+  },
+  "environment": {
+    "nodeVersion": "v22.14.0",
+    "os": "linux",
+    "arch": "x64",
+    "ci": false
+  },
+  "dependencies": [
+    {
+      "name": "electron",
+      "version": "41.2.0",
+      "resolved": "/tmp/sovereign-docs/node_modules/electron",
+      "integrity": "070d9db5295c1fa3",
+      "suspicious": false,
+      "riskScore": 0.1
+    }
+  ],
+  "gates": [
+    {
+      "gate": "GIT_INTEGRITY",
+      "status": "PASS",
+      "evidence": "Working tree clean",
+      "durationMs": 14
+    },
+    {
+      "gate": "LOCKFILE",
+      "status": "PASS",
+      "evidence": "package-lock.json present",
+      "durationMs": 0
+    },
+    {
+      "gate": "DETERMINISTIC_BUILD",
+      "status": "INCONCLUSIVE",
+      "evidence": "No build command detected",
+      "durationMs": 0
+    },
+    {
+      "gate": "TEST_PASS",
+      "status": "FAIL",
+      "evidence": "Tests failed: npm error Missing script: \"test\"\nnpm error\nnpm error To see a list of scripts, run:\nnpm error   npm run\nnpm error A complete log of this run can be found in: /home/veritas/.npm/_logs/2026-04-30T00_23_",
+      "durationMs": 75
+    },
+    {
+      "gate": "LINT",
+      "status": "PASS",
+      "evidence": "npx passed",
+      "durationMs": 2454
+    }
+  ],
+  "adversarial": {
+    "totalPackages": 1,
+    "suspiciousPackages": 0,
+    "probes": [
+      {
+        "package": "electron",
+        "probe": "TYPO_SQUATTING",
+        "result": "PASS",
+        "detail": "Name heuristic clean"
+      },
+      {
+        "package": "electron",
+        "probe": "VERSION_ANOMALY",
+        "result": "PASS",
+        "detail": "Pinned: 41.2.0"
+      },
+      {
+        "package": "electron",
+        "probe": "METADATA_INTEGRITY",
+        "result": "PASS",
+        "detail": "Hash: 070d9db5295c1fa3"
+      },
+      {
+        "package": "system",
+        "probe": "KIMI_REASONING",
+        "result": "INCONCLUSIVE",
+        "detail": "OLLAMA_CLOUD_API_KEY is not set. Skipping Kimi adversarial analysis."
+      }
+    ],
+    "overallRisk": 0
+  },
+  "seal": {
+    "chainHash": "2b297895d77939edbbac0bb03ee5508381d3ad43ae0de4c7ddcdb02cbdd1b831",
+    "sequence": 5
+  },
+  "signature": "0bddb4e5456ffa0d03ea7e00128423bb940e55c209cd19b62228c12e0e422989"
+}
